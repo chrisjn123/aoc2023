@@ -1,28 +1,7 @@
-from collections import *
-from itertools import *
-from re import findall
-import sys
+from collections import defaultdict
+from utils import get_adj, get_data
 
-data = [line.strip() for line in open('in.txt').readlines()]
-
-if len(data) == 1:
-    data = data[0]
-elif len(data) == 0:
-    print('No data gathered.')
-    sys.exit(0)
-
-def get_adj(i, j) -> list:
-    global data
-    tmp = [
-        (i-1, j-1), (i-1, j), (i-1, j+1),
-        (i, j-1),             (i, j+1),
-        (i+1, j-1), (i+1, j), (i+1, j+1)
-    ]
-    adj = []
-    for a, b in tmp:
-        if (a >=0 and b >= 0) and (a < len(data) and b < len(data[0])):
-            adj.append((a,b))
-    return adj
+data = get_data('day03/in.txt')
 
 res = 0
 part_nums = []
@@ -42,7 +21,7 @@ for i, row in enumerate(data):
         else:
             val = (val*10) + int(ch)
             if not continuation:
-                for x,y in get_adj(i, j):
+                for x,y in get_adj(data, i, j):
                     if data[x][y] not in ['.','1','2','3','4','5','6','7','8','9','0']:
                         continuation = True
                         break
