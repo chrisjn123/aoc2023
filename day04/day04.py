@@ -4,7 +4,7 @@ from utils import get_adj, get_data
 from re import findall
 from itertools import product
 
-data = get_data('test.txt')
+data = get_data('in.txt')
 
 cards = defaultdict(tuple)
 for line in data:
@@ -46,11 +46,6 @@ def get_next(i: int):
 si = 0
 
 get_next(1)
-for card, num_card in cards_count.items():
-    si += card_cal[card] * num_card
-    print(f'card {card}: {num_card} Copies each for {card_cal[card]} = {card_cal[card] * num_card} (sum = {si})')
-for card in card_cal:
-    if card not in cards_count:
-        si += card_cal[card]
-        print(f'card {card}: 1 copies each for {card_cal[card]} = {card_cal[card]} (sum = {si})')
-print(si)
+missing = [card for card in cards if card not in cards_count]
+print(sum(cards_count.values()) + len(missing))
+print()
