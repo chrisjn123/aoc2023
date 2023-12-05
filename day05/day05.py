@@ -16,6 +16,9 @@ for seed in seeds:
     for m_data in maps.values():
         for vals in m_data:
             dst, src, length = map(int, findall(r'\d+', vals))
+            # if searching for something in this range, then map to new location in next map and move on
+            # this problem has a guaranteed solution so not risky this way...
+            # else, move to next list (location will be seed if not existing in ANY list)
             if tmp in range(src, length+src):
                 tmp = dst - src + tmp
                 break
