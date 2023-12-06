@@ -5,8 +5,8 @@ from utils import get_data, get_adj
 
 data = get_data('in.txt')
 
-times = list(findall(r'\d', data[0]))
-distances = list(findall(r'\d', data[1]))
+times = list(findall(r'\d+', data[0]))
+distances = list(findall(r'\d+', data[1]))
 
 times = [int(''.join(times))]
 distances = [int(''.join(distances))]
