@@ -5,11 +5,11 @@ from re import findall
 
 from utils import get_data
 
-data = get_data('test.txt')
+data = get_data('in.txt')
 
 order = {
     'A': 14, 'K': 13,
-    'Q': 12, 'J': 11,
+    'Q': 12, 'J': 1,
     'T': 10, '9': 9,
     '8': 8, '7': 7,
     '6': 6, '5': 5,
@@ -66,10 +66,50 @@ def high_card(hand):
     h = max([order[l] for l in hand])
     return h
 
+def get_best(hand: str):
+    bests = defaultdict(list)
+    for c in order:
+        if c == 'J':
+            continue
+        nh = hand.replace('J', c)
+        if is_five_of(nh):
+            bests['5'].append(nh)
+        elif is_four_of(nh):
+            bests['4'].append(nh)
+        elif is_full_house(nh):
+            bests['f'].append(nh)
+        elif is_three_of(nh):
+            bests['3'].append(nh)
+        elif is_two_pair(nh):
+            bests['2'].append(nh)
+        elif is_one_pair(nh):
+            bests['1'].append(nh)
+        else:
+            bests['h'].append(nh)
+        
+        tmp = []
+        for h in bests['5']:
+            tmp.append(h)
+        for h in bests['4']:
+            tmp.append(h)
+        for h in bests['f']:
+            tmp.append(h)
+        for h in bests['3']:
+            tmp.append(h)
+        for h in bests['2']:
+            tmp.append(h)
+        for h in bests['1']:
+            tmp.append(h)
+        for h in bests['h']:
+            tmp.append(h)
+
+    return tmp[0]
+
 scores = defaultdict(int)
 for line in data:
     card, value = line.split()
     value = int(value)
+    #card = get_best(card) if 'J' in card else card
     scores[card] = value
 
 card_orders = {
@@ -93,9 +133,16 @@ def compare(card_1, card_2):
         if xn > yn:
             return 1
         elif xn < yn:
-            return 0
+            return -1
 
+j_to_best = defaultdict(str)
 for card in scores:
+    if 'J' in card:
+        j_to_best[card] = get_best(card)
+
+for hand in scores:
+    card = hand if hand not in j_to_best.keys() else j_to_best[hand]
+
     if is_five_of(card):
         card_orders['five'].append(card)
     elif is_four_of(card):
@@ -112,15 +159,18 @@ for card in scores:
         card_orders['high'].append(card)
 
 def num(card):
-    return [order[c] for c in card]
+    ret = [order[c] for c in card]
+    if ret == None or ret == []:
+        print()
+    return ret
 
-high = sorted([(card, high_card(card)) for card in card_orders['high']], key=cmp_to_key(compare))[::-1]
-ones = sorted([(card, num(card)) for card in card_orders['one']], key=cmp_to_key(compare))[::-1]
-twos = sorted([(card, num(card)) for card in card_orders['two']], key=cmp_to_key(compare))[::-1]
-three = sorted([(card, num(card)) for card in card_orders['three']], key=cmp_to_key(compare))[::-1]
-full = sorted([(card, num(card)) for card in card_orders['full']], key=cmp_to_key(compare))[::-1]
-four = sorted([(card, num(card)) for card in card_orders['four']], key=cmp_to_key(compare))[::-1]
-five = sorted([(card, num(card)) for card in card_orders['five']], key=cmp_to_key(compare))[::-1]
+high = sorted([(card, high_card(card)) for card in card_orders['high']], key=cmp_to_key(compare))
+ones = sorted([(card, num(card)) for card in card_orders['one']], key=cmp_to_key(compare))
+twos = sorted([(card, num(card)) for card in card_orders['two']], key=cmp_to_key(compare))
+three = sorted([(card, num(card)) for card in card_orders['three']], key=cmp_to_key(compare))
+full = sorted([(card, num(card)) for card in card_orders['full']], key=cmp_to_key(compare))
+four = sorted([(card, num(card)) for card in card_orders['four']], key=cmp_to_key(compare))
+five = sorted([(card, num(card)) for card in card_orders['five']], key=cmp_to_key(compare))
 
 ranks = []
 for a in high:
@@ -139,8 +189,15 @@ for a in five:
     ranks.append(a[0])
 
 s = 0
-for i, card in enumerate(ranks):
+for i, hand in enumerate(ranks):
     r = i + 1
+    if hand in j_to_best.values():
+        for f, t in j_to_best.items():
+            if t == hand:
+                card = f
+                break
+    else:
+        card = hand
     bid = scores[card]
     print(f'{card}: rank: {r} with bid {bid}')
     s += (r * bid)
