@@ -8,18 +8,12 @@ from utils import get_data
 data = get_data('test.txt')
 
 order = {
-    'A': 14,
-    'K': 13,
-    'Q': 12,
-    'J': 11,
-    'T': 10,
-    '9': 9,
-    '8': 8,
-    '7': 7,
-    '6': 6,
-    '5': 5,
-    '4': 4,
-    '3': 3,
+    'A': 14, 'K': 13,
+    'Q': 12, 'J': 11,
+    'T': 10, '9': 9,
+    '8': 8, '7': 7,
+    '6': 6, '5': 5,
+    '4': 4, '3': 3,
     '2': 2
 }
 
@@ -72,12 +66,6 @@ def high_card(hand):
     h = max([order[l] for l in hand])
     return h
 
-lefts, rights = [], []
-for line in data:
-    left, right = line.split()
-    lefts.append(left)
-    rights.append(right)
-
 scores = defaultdict(int)
 for line in data:
     card, value = line.split()
@@ -126,13 +114,13 @@ for card in scores:
 def num(card):
     return [order[c] for c in card]
 
-high = sorted([(card, high_card(card)) for card in card_orders['high']], key=cmp_to_key(compare))
-ones = sorted([(card, num(card)) for card in card_orders['one']], key=cmp_to_key(compare))
-twos = sorted([(card, num(card)) for card in card_orders['two']], key=cmp_to_key(compare))
-three = sorted([(card, num(card)) for card in card_orders['three']], key=cmp_to_key(compare))
-full = sorted([(card, num(card)) for card in card_orders['full']], key=cmp_to_key(compare))
-four = sorted([(card, num(card)) for card in card_orders['four']], key=cmp_to_key(compare))
-five = sorted([(card, num(card)) for card in card_orders['five']], key=cmp_to_key(compare))
+high = sorted([(card, high_card(card)) for card in card_orders['high']], key=cmp_to_key(compare))[::-1]
+ones = sorted([(card, num(card)) for card in card_orders['one']], key=cmp_to_key(compare))[::-1]
+twos = sorted([(card, num(card)) for card in card_orders['two']], key=cmp_to_key(compare))[::-1]
+three = sorted([(card, num(card)) for card in card_orders['three']], key=cmp_to_key(compare))[::-1]
+full = sorted([(card, num(card)) for card in card_orders['full']], key=cmp_to_key(compare))[::-1]
+four = sorted([(card, num(card)) for card in card_orders['four']], key=cmp_to_key(compare))[::-1]
+five = sorted([(card, num(card)) for card in card_orders['five']], key=cmp_to_key(compare))[::-1]
 
 ranks = []
 for a in high:
