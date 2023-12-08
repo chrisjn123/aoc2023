@@ -2,10 +2,12 @@ from collections import  defaultdict
 from itertools import product, cycle
 from utils import *
 from math import lcm
-
+from time import perf_counter
 from sys import setrecursionlimit
-
 setrecursionlimit(10_000_000)
+
+time_1 = perf_counter()
+
 data = get_data('in.txt')
 
 ins = cycle(data[0])
@@ -45,3 +47,4 @@ for start in starts:
     counts[start] = count
 
 print(lcm(*list(counts.values())))
+print(perf_counter() - time_1)
