@@ -3,10 +3,9 @@ from collections import defaultdict
 from utils import *
 import numpy as np
 
-data = get_data('in.txt')
+data = get_data('test.txt')
 for i, line in enumerate(data):
     data[i] = list(line)
-    
 
 start = (0,0)
 def directions(pipe: str, i: int, j: int) -> tuple:
@@ -30,8 +29,6 @@ def directions(pipe: str, i: int, j: int) -> tuple:
             return (0,1,0,0)
         case other:
             return (0,0,0,0)
-
-
 
 _map = defaultdict(list)
 for i, line in enumerate(data):
@@ -65,25 +62,33 @@ while data[r][c] != 'S' or flag:
     count += 1
 print(count, count // 2)
 
+letter_to_uni = {
+    'J': '\u2518',
+    '-': '\u2500',
+    '|': '\u2502',
+    '7': '\u2510',
+    'F': '\u250C',
+    'S': '\u2573',
+    'L': '\u2514',
+}
 
 for i in range(len(data)):
     for j in range(len(data[0])):
         if (i,j) not in path:
             data[i][j] = ' '
             _map[i][j] = (0,0,0,0)
-        print(data[i][j], end='')
-    print()
+        else:
+            data[i][j] = letter_to_uni[data[i][j]]
 
-area = len(data[0]) * len(data)
+for i, line in enumerate(data):
+    data[i] = [' '] + line + [' ']
 
-for i, line in enumerate( data):
-    if ''.join(line).strip() == '':
-        continue
-    l = min([t for t, c in enumerate(line) if c != ' '])
-    r = max([t for t, c in enumerate(line) if c != ' '])
-    area -= l
-    area -= (len(line) - r)
-    area -= (len([c for c in line if c != ' ']) - 2)
-    print(area)
+def print_loop() -> None:
+    global data
+    for line in data:
+        for c in line:
+            print(c, end='')
+        print()
 
-print(area)
+def flood():
+    global data
