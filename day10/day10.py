@@ -2,8 +2,9 @@ from collections import defaultdict
 
 from utils import *
 import numpy as np
+import cv2
 
-data = get_data('test.txt')
+data = get_data('in.txt')
 for i, line in enumerate(data):
     data[i] = list(line)
 
@@ -82,13 +83,35 @@ for i in range(len(data)):
 
 for i, line in enumerate(data):
     data[i] = [' '] + line + [' ']
+blank = []
+for i in range(len(data[0])):
+    blank.append(' ')
 
-def print_loop() -> None:
-    global data
-    for line in data:
+data.insert(0, blank)
+data.append(blank)
+
+def print_loop(d) -> None:
+    for line in d:
         for c in line:
             print(c, end='')
         print()
 
 def flood():
-    global data
+    global data, start
+    print_loop(data)
+    matrix = np.asarray(data)
+    numeric = np.where(matrix!=' ', 255, 0).astype(np.uint8)
+    mask = np.zeros(np.asarray(numeric.shape)+2, dtype=np.uint8)
+    start_pt = (0,0)
+    if matrix[start_pt]:
+        cv2.floodFill(numeric, mask, start_pt, 255, flags=4)
+    mask = mask[1:-1, 1:-1]
+    matrix[mask==1] = 'O'
+    print_loop(matrix.tolist())
+    res = np.where(matrix==' ', 255, 0 ).astype(np.uint8).tolist()
+    #matrix = matrix.tolist()
+    print(
+        len([c for line in res for c in line if c == 255])
+    )
+
+flood()
