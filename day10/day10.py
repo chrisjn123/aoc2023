@@ -71,6 +71,9 @@ letter_to_uni = {
     'F': '\u250C',
     'S': '\u2573',
     'L': '\u2514',
+    '#': '\u2588',
+    ' ': ' ',
+    '.': '.'
 }
 
 for i in range(len(data)):
@@ -81,14 +84,14 @@ for i in range(len(data)):
         else:
             data[i][j] = letter_to_uni[data[i][j]]
 
-for i, line in enumerate(data):
-    data[i] = [' '] + line + [' ']
-blank = []
-for i in range(len(data[0])):
-    blank.append(' ')
+# for i, line in enumerate(data):
+#     data[i] = [' '] + line + [' ']
+# blank = []
+# for i in range(len(data[0])):
+#     blank.append(' ')
 
-data.insert(0, blank)
-data.append(blank)
+#data.insert(0, blank)
+#data.append(blank)
 
 def print_loop(d) -> None:
     for line in d:
@@ -96,22 +99,69 @@ def print_loop(d) -> None:
             print(c, end='')
         print()
 
-def flood():
-    global data, start
-    print_loop(data)
-    matrix = np.asarray(data)
+def flood(d):
+    global start
+    #print_loop(d)
+    matrix = np.asarray(d)
     numeric = np.where(matrix!=' ', 255, 0).astype(np.uint8)
     mask = np.zeros(np.asarray(numeric.shape)+2, dtype=np.uint8)
     start_pt = (0,0)
     if matrix[start_pt]:
         cv2.floodFill(numeric, mask, start_pt, 255, flags=4)
     mask = mask[1:-1, 1:-1]
-    matrix[mask==1] = 'O'
-    print_loop(matrix.tolist())
+    matrix[mask==1] = '.'
     res = np.where(matrix==' ', 255, 0 ).astype(np.uint8).tolist()
-    #matrix = matrix.tolist()
-    print(
-        len([c for line in res for c in line if c == 255])
-    )
+    matrix = matrix.tolist()
 
-flood()
+    #print_loop(matrix)
+    v = len([c for line in res for c in line if c == 255])
+    return v
+
+print(flood(data))
+
+print_loop(data)
+data_big = []
+for i in range(4*len(data)):
+    a = []
+    for j in range(4*len(data[0])):
+        a.append(' ')
+    data_big.append(a)
+
+pieces = {
+    letter_to_uni['|']: [[' ', '#', ' '],
+                         [' ', '#', ' '],
+                         [' ', '#', ' '],],
+    letter_to_uni['-']: [[' ',' ',' '],
+                         ['#','#','#'],
+                         [' ',' ',' ']],
+    letter_to_uni['L']: [[' ','#',' '],
+                         [' ','#','#'],
+                         [' ',' ',' ']],
+    letter_to_uni['7']: [[' ',' ',' '],
+                         ['#','#',' '],
+                         [' ','#',' ']],
+    letter_to_uni['F']: [[' ',' ',' '],
+                         [' ','#','#'],
+                         [' ','#',' ']],
+    letter_to_uni['J']: [[' ','#',' '],
+                         ['#','#',' '],
+                         [' ',' ',' ']],
+    letter_to_uni['S']: [[' ',' ',' '],
+                         ['#','#',' '],
+                         [' ','#',' ']]
+}
+
+
+for coord in path:
+    x,y = coord
+    piece = data[x][y]
+    x = (3*x) + 2
+    y = (3*y) + 2
+    for i, j in product(range(3), range(3)):
+        if piece in pieces.keys():
+            data_big[x+i][y+j] = letter_to_uni[pieces[piece][i][j]]
+        else:
+            print(f'Piece: {piece} Coord: {coord}')
+
+print(flood(data_big) // 81)
+print()
