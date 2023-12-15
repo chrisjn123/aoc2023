@@ -22,16 +22,12 @@ def get_hash(curr_str: str):
         curr_value *= 17
         curr_value %= 256
     return curr_value
-"""
+
 s = 0
 for h in data:
-    curr = 0
-    for i in h:
-        curr = get_hash(i, curr)
-    print(curr)
-    s += curr
+    s += get_hash(h)
 print(s)
-"""
+
 boxes = {i:[] for i in range(256)}
 
 stack_idx = 0
@@ -65,5 +61,4 @@ for box, item in boxes.items():
         fl = int(it.split('=')[-1])
         v = (box+1) * (i+1) * fl
         s += v
-        print(v)
 print(s)
