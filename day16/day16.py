@@ -1,4 +1,7 @@
 from utils import get_data
+from functools import cache
+from concurrent.futures import ThreadPoolExecutor
+from itertools import product
 
 data = [list(i) for i in get_data('in.txt')]
 start = (0, 0)
@@ -27,6 +30,7 @@ def print_grid(p, xx, yy):
 
 splits = set()
 
+@cache
 def move_beam(pos, d):
     x,y = pos
     dx,dy = d
@@ -45,7 +49,7 @@ def move_beam(pos, d):
                 else:
                     if (x,y) not in splits:
                         splits.add((x,y))
-                        print(f'Split Verically {(x,y)}')
+                        #print(f'Split Verically {(x,y)}')
                         move_beam((x+1, y), (1, 0))
                         move_beam((x-1, y), (-1, 0))
                     return
@@ -55,7 +59,7 @@ def move_beam(pos, d):
                     y += dy
                 else:
                     if (x,y) not in splits:
-                        print(f'Split Horzi {(x, y)}')
+                        #print(f'Split Horzi {(x, y)}')
                         splits.add((x,y))
                         move_beam((x, y+1), (0, 1))
                         move_beam((x, y-1), (0, -1))
@@ -91,5 +95,16 @@ def move_beam(pos, d):
                 x += dx
                 y += dy
 
-move_beam(start, (0, 1))
-print(len(energized))
+possibles = [(i, j) for i in range(len(data)) for j in range(len(data[0]))]
+dirs = [(1,0), (-1,0), (0,1), (0,-1)]
+
+s = []
+i = 1
+for start, dir in product(possibles, dirs):
+    print(f'Run #{i}')
+    energized.clear()
+    move_beam(start, dir)
+    s.append(len(energized))
+    i += 1
+
+print(max(s))
