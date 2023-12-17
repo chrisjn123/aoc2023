@@ -1,110 +1,74 @@
+from collections import deque
 from utils import get_data
-from functools import cache
+from time import perf_counter
 from concurrent.futures import ThreadPoolExecutor
-from itertools import product
+from functools import cache
 
-data = [list(i) for i in get_data('in.txt')]
-start = (0, 0)
-
-energized = set()
-
-char_map = {
-    (0,1): '>',
-    (0,-1): '<',
-    (1,0): 'V',
-    (-1,0): '^',
-}
-
-def print_grid(p, xx, yy):
-    global data, char_map
-    xi, yi = p
-    for i in range(len(data)):
-        for j in range(len(data[0])):
-            if (i, j) == p:
-                ch = char_map[(xx,yy)]
-                print(ch, end='')
-            else:
-                print(data[i][j], end='')
-        print()
-    print()
-
-splits = set()
+GRID = get_data('in.txt')
 
 @cache
-def move_beam(pos, d):
-    x,y = pos
-    dx,dy = d
-    while x >= 0 and x < len(data) and y < len(data[0]) and y >= 0:
-        piece = data[x][y]
-        energized.add((x,y))
-        #print_grid((x,y), dx, dy)
-        match piece:
-            case '.':
-                x += dx
-                y += dy
-            case '|':
-                if dx in (-1, 1):
-                    x += dx
-                    y += dy
-                else:
-                    if (x,y) not in splits:
-                        splits.add((x,y))
-                        #print(f'Split Verically {(x,y)}')
-                        move_beam((x+1, y), (1, 0))
-                        move_beam((x-1, y), (-1, 0))
-                    return
-            case '-':
-                if dy in (-1, 1):
-                    x += dx
-                    y += dy
-                else:
-                    if (x,y) not in splits:
-                        #print(f'Split Horzi {(x, y)}')
-                        splits.add((x,y))
-                        move_beam((x, y+1), (0, 1))
-                        move_beam((x, y-1), (0, -1))
-                    return
-            case '\\':
-                if dx == -1:
-                    dx = 0
-                    dy = -1
-                elif dx == 1:
-                    dx = 0
-                    dy = 1
-                elif dy == -1:
-                    dx = -1
-                    dy = 0
-                elif dy == 1:
-                    dx = 1
-                    dy = 0
-                x += dx
-                y += dy
-            case '/':
-                if dx == -1:
-                    dx = 0
-                    dy = 1
-                elif dx == 1:
-                    dx = 0
-                    dy = -1
-                elif dy == -1:
-                    dx = 1
-                    dy = 0
-                elif dy == 1:
-                    dx = -1
-                    dy = 0
-                x += dx
-                y += dy
+def DFS(i, j, di, dj):
+    global GRID
+    n, m = len(GRID), len(GRID[0])
+    q = deque([(i, j, di, dj)])
+    seen = set()
+    while q:
+        i, j, di, dj = q.popleft()
+        if 0 > i or i >= n or 0 > j or j >= m or (i, j, di, dj) in seen:
+            continue
+        seen.add((i, j, di, dj))
+        match GRID[i][j]:
+            case "/":
+                q.append((i - dj, j - di, -dj, -di))
+            case "\\":
+                q.append((i + dj, j + di, dj, di))
+            case "|" if dj:
+                q.append((i + 1, j, 1, 0))
+                q.append((i - 1, j, -1, 0))
+            case "-" if di:
+                q.append((i, j + 1, 0, 1))
+                q.append((i, j - 1, 0, -1))
+            case _:
+                q.append((i + di, j + dj, di, dj))
+    return len(set((i, j) for i, j, _, _ in seen))
 
-possibles = [(i, j) for i in range(len(data)) for j in range(len(data[0]))]
-dirs = [(1,0), (-1,0), (0,1), (0,-1)]
+def part_one():
+    return DFS(0, 0, 0, 1)
 
-s = []
-i = 1
-for start, dir in product(possibles, dirs):
-    print(f'Run #{i}')
-    energized.clear()
-    move_beam(start, dir)
-    s.append(len(energized))
-    i += 1
+def part_two():
+    n, m = len(GRID), len(GRID[0])
+    res = 0
+    for i, j, di, dj in (
+        [(x, 0, 0, 1) for x in range(n)]
+        + [(x, m - 1, 0, -1) for x in range(n)]
+        + [(0, x, 1, 0) for x in range(m)]
+        + [(n - 1, x, -1, 0) for x in range(m)]
+    ):
+        res = max(res, DFS(i, j, di, dj))
+    return res
 
-print(max(s))
+def part_two_threads():
+    res = []
+    with ThreadPoolExecutor(max_workers=12) as pool:
+        n, m = len(GRID), len(GRID[0])
+        for i, j, di, dj in (
+            [(x, 0, 0, 1) for x in range(n)]
+            + [(x, m - 1, 0, -1) for x in range(n)]
+            + [(0, x, 1, 0) for x in range(m)]
+            + [(n - 1, x, -1, 0) for x in range(m)]
+        ):
+            res.append(pool.submit(DFS, i, j, di, dj).result())
+    return max(res)
+
+start = perf_counter()
+print(f"Part 1     : {part_one()}")
+print(f'Part 1 time: {perf_counter() - start} sec')
+print()
+
+start = perf_counter()
+print(f"Part 2     : {part_two()}")
+print(f'Part 2 time: {perf_counter() - start} sec')
+
+start = perf_counter()
+print(f"Part 2 Tread: {part_two_threads()}")
+print(f'Part 2 time : {perf_counter() - start} sec')
