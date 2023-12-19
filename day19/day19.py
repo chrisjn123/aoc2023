@@ -1,12 +1,14 @@
 from re import findall
+from itertools import product
 
-data = open('in.txt').read().split('\n\n')
+data = open('test.txt').read().split('\n\n')
 rules_raw = data[0].split()
 in_vals = data[1].split()
 rating = []
 rules = {line.split('{')[0]: line.split('{')[1].replace('}','').split(',') for line in rules_raw}
-for v in in_vals:
-    x,m,a,s = list(map(int, findall(r'\d+', v)))
+
+def check(x,m,a,s):
+    global rating, rules
     rule_key = 'in'
     done = False
     while True:
@@ -30,8 +32,10 @@ for v in in_vals:
                     break
         if done:
             break
-s = 0
-for val, r in zip(in_vals, rating):
-    if r == 'A':
-        s += sum(list(map(int, findall(r'\d+', val))))
-print(s)
+from concurrent.futures import ThreadPoolExecutor
+with ThreadPoolExecutor(max_workers=4) as pool:
+    for x,m,a,s in product(range(1,4001), range(1,4001),
+                           range(1,4001),range(1,4001)):
+        pool.submit(check(x,m,a,s))
+
+print(len([r for r in rating if r == 'A']))
