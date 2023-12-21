@@ -29,6 +29,7 @@ def search(state: tuple[int]):
         if score == TARGET and data[x][y] == '.':
             points.add((x,y))
             continue
+
         if (x,y) in seen:
             continue
         if data[x-1][y] == '.':
