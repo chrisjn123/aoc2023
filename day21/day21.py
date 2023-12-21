@@ -30,7 +30,7 @@ def search(state: tuple[int]):
         score, (x,y) = heappop(q)
         if not (0<=x<len(data)<0 or 0<=y<len(data[0])):
             return
-        if (x,y) in seen or score > TARGET:
+        if (x,y) in seen or score > TARGET or data[x][y] == '#':
             continue
         seen.add((x,y))
 
@@ -38,10 +38,10 @@ def search(state: tuple[int]):
             points.add((x,y))
             continue
         
-        heappush(q, (manhattan(x-1,y,start[0],start[1]), (x-1,y)))
-        heappush(q, (manhattan(x+1,y,start[0],start[1]), (x+1,y)))
-        heappush(q, (manhattan(x,y-1,start[0],start[1]), (x,y-1)))
-        heappush(q, (manhattan(x,y+1,start[0],start[1]), (x,y+1)))
+        heappush(q, (score+1, (x-1,y)))
+        heappush(q, (score+1, (x+1,y)))
+        heappush(q, (score+1, (x,y-1)))
+        heappush(q, (score+1, (x,y+1)))
 
 search(start)
 print(len(points))
